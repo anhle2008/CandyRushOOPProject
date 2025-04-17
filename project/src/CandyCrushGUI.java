@@ -1,6 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+// import java.awt.event.*;
 import java.util.Random;
 
 public class CandyCrushGUI extends JFrame {
@@ -12,23 +12,39 @@ public class CandyCrushGUI extends JFrame {
     private int clickCount = 0;
     private JButton firstButton, secondButton;
 
-    public CandyCrushGUI() {
-        setTitle("Candy Crush Mini");
-        setLayout(new GridLayout(SIZE, SIZE));
-        setSize(500, 500);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+    private JLabel scoreLabel;
+    private int totalScore = 0;
+    private final int scorePerCandy = 10;
 
-        initBoard();
+    public CandyCrushGUI() {
+        // Initialize window
+        setTitle("Candy Crush Mini");
+        setSize(500, 550); // Slightly taller for score label
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // Initialize score label
+        scoreLabel = new JLabel("Score: 0", SwingConstants.CENTER);
+        scoreLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        scoreLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        add(scoreLabel, BorderLayout.NORTH);
+
+        // Initialize candies grid
+        JPanel gridPanel = new JPanel(new GridLayout(SIZE, SIZE));
+        initBoard(gridPanel);
+        add(gridPanel, BorderLayout.CENTER);
+
         processMatches(); // Crush initial matches if any
         setVisible(true);
     }
 
-    private void initBoard() {
+    private void initBoard(JPanel panel) {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 JButton btn = new JButton();
                 btn.setFont(new Font("Arial", Font.BOLD, 20));
                 btn.setBackground(Color.WHITE);
+
                 char candy = randomCandy();
                 btn.setText(String.valueOf(candy));
                 btn.setBackground(getColorForCandy(candy));
@@ -37,7 +53,7 @@ public class CandyCrushGUI extends JFrame {
                 btn.addActionListener(e -> handleClick(row, col));
 
                 buttons[i][j] = btn;
-                add(btn);
+                panel.add(btn);
             }
         }
     }
@@ -110,15 +126,22 @@ public class CandyCrushGUI extends JFrame {
     private boolean crushMatches() {
         boolean[][] toCrush = getMatchMatrix();
         boolean crushed = false;
+        int crushedCount = 0;
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 if (toCrush[i][j]) {
                     buttons[i][j].setText(" ");
                     buttons[i][j].setBackground(Color.WHITE);
-                    crushed = true; // Mark that something was crushed
+                    crushed = true; // Candy is crushed
+                    crushedCount++;
                 }
             }
+        }
+
+        if (crushed) {
+            totalScore += crushedCount * scorePerCandy;
+            scoreLabel.setText("Score: " + totalScore);
         }
 
         return crushed;
