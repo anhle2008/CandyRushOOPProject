@@ -58,6 +58,10 @@ public class CandyCrushGame {
         } while (foundMatch);
     }
 
+    private boolean isEmpty(CandyButton btn) {
+        return btn.getText().equals(" ");
+    }
+
     private boolean crushMatches() {
         boolean[][] toCrush = getMatchMatrix();
         boolean crushed = false;
@@ -68,7 +72,7 @@ public class CandyCrushGame {
                 if (toCrush[i][j]) {
                     buttons[i][j].setText(" ");
                     buttons[i][j].setBackground(Color.WHITE);
-                    
+
                     crushed = true;
                     crushedCount++;
                 }
@@ -87,7 +91,7 @@ public class CandyCrushGame {
             int emptyRow = SIZE - 1;
 
             for (int i = SIZE - 1; i >= 0; i--) {
-                if (!buttons[i][j].getText().equals(" ")) {
+                if (!isEmpty(buttons[i][j])) {
                     buttons[emptyRow][j].setText(buttons[i][j].getText());
                     buttons[emptyRow][j].setBackground(buttons[i][j].getBackground());
 
@@ -105,7 +109,7 @@ public class CandyCrushGame {
     private void refillBoard() {
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                if (buttons[i][j].getText().equals(" ")) {
+                if (isEmpty(buttons[i][j])) {
                     char candy = CandyUtils.randomCandy();
 
                     buttons[i][j].setText(String.valueOf(candy));

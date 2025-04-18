@@ -9,6 +9,7 @@ public class CandyCrushGUI extends JFrame {
 
     private final int mainGameSize = 500;
     private final int scoreHeight = 50;
+    private final int animationDelay = 300;
 
     private int clickCount = 0;
     private CandyButton firstButton, secondButton;
@@ -30,7 +31,7 @@ public class CandyCrushGUI extends JFrame {
         add(gridPanel, BorderLayout.CENTER);
 
         game = new CandyCrushGame(buttons, SIZE);
-        game.processMatches();
+        game.processMatches(); // Preprocessing matches
         setVisible(true);
     }
 
@@ -60,12 +61,17 @@ public class CandyCrushGUI extends JFrame {
             if (firstButton != secondButton && game.areAdjacent(firstButton, secondButton)) {
                 game.swap(firstButton, secondButton);
 
-                if (game.hasMatch()) {
-                    game.processMatches();
-                    scoreLabel.setText("Score: " + game.getTotalScore());
-                } else {
-                    game.swap(firstButton, secondButton); // Revert
-                }
+                // Visual feedback for swap -> crush -> drop
+                Timer timer = new Timer(animationDelay, e -> {
+                    if (game.hasMatch()) {
+                        game.processMatches();
+                        scoreLabel.setText("Score: " + game.getTotalScore());
+                    } else {
+                        game.swap(firstButton, secondButton); // Revert
+                    }
+                });
+                timer.setRepeats(false);
+                timer.start();
             }
 
             clickCount = 0;
