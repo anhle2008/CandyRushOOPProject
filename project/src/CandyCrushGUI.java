@@ -31,7 +31,7 @@ public class CandyCrushGUI extends JFrame {
 
         // Initialize main game
         game = new CandyCrushGame(buttons, SIZE);
-        game.processMatches(); // Preprocessing matches
+        game.processMatches(false); // Preprocessing matches
 
         // Show window
         setVisible(true);
@@ -61,16 +61,21 @@ public class CandyCrushGUI extends JFrame {
             firstButton.setBackground(CandyUtils.getColorForCandy(firstButton.getText().charAt(0)));
 
             if (firstButton != secondButton && game.areAdjacent(firstButton, secondButton)) {
-                game.swap(firstButton, secondButton);
-
-                if (game.hasMatch()) {
-                    game.processMatchesAnimated();
-
-                    // Score update callback
-                    game.setScoreUpdateCallback(() -> scoreLabel.setText("Score: " + game.getTotalScore()));
-                } else {
-                    game.swap(firstButton, secondButton); // Revert candies swap
-                }
+                game.animateSwap(firstButton, secondButton, () -> {
+                    game.swap(firstButton, secondButton);
+    
+                    if (game.hasMatch()) {
+                        game.processMatches(true);
+    
+                        // Score update
+                        game.setScoreUpdateCallback(() -> scoreLabel.setText("Score: " + game.getTotalScore()));
+                    } else {
+                        // Revert the swap when no matches found
+                        game.animateSwap(firstButton, secondButton, () -> {
+                            game.swap(firstButton, secondButton);
+                        });
+                    }
+                });
             }
 
             clickCount = 0;

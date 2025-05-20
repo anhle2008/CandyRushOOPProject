@@ -20,6 +20,11 @@ public class CandyCrushGame {
         return totalScore;
     }
 
+    /**
+     * Candies swapping logic
+     * @param a current candy to be swapped
+     * @param b destinated candy
+     */
     public void swap(CandyButton a, CandyButton b) {
         String temp = a.getText();
         Color colorTemp = a.getBackground();
@@ -29,6 +34,34 @@ public class CandyCrushGame {
 
         b.setText(temp);
         b.setBackground(colorTemp);
+    }
+
+    /**
+     * Animation for swapping, done by highlighting candies before swapping.
+     * @param a current candy to be swapped
+     * @param b destinated candy
+     * @param onComplete method to be run
+     */
+    public void animateSwap(CandyButton a, CandyButton b, Runnable onComplete) {
+        Color originalColorA = a.getBackground();
+        Color originalColorB = b.getBackground();
+        
+        // Briefly animate the swap by highlighting both candies
+        a.setBackground(Color.YELLOW);
+        b.setBackground(Color.YELLOW);
+
+        Timer timer = new Timer(CandyUtils.getAnimationDelay(), e -> {
+            // Reset candies background color after delay
+            a.setBackground(originalColorA);
+            b.setBackground(originalColorB);
+
+            // Proceed with the swap
+            onComplete.run();
+            ((Timer) e.getSource()).stop();
+        });
+
+        timer.setRepeats(false);
+        timer.start();
     }
 
     public boolean areAdjacent(CandyButton a, CandyButton b) {
@@ -54,9 +87,21 @@ public class CandyCrushGame {
     }
 
     /**
+     * Process candies match.
+     * @param withAnimation whenever to enable matching animation or not.
+     */
+    public void processMatches(boolean withAnimation) {
+        if (withAnimation) {
+            processMatchesWithAnimation();
+        } else {
+            processMatchesNoAnimation();
+        }
+    }
+
+    /**
      * Process candies match, without animation. This is useful for preprocessing matches when the game start.
      */
-    public void processMatches() {
+    private void processMatchesNoAnimation() {
         boolean foundMatch;
 
         do {
@@ -69,7 +114,7 @@ public class CandyCrushGame {
     /**
      * Processing candies match, but with animation.
      */
-    public void processMatchesAnimated() {
+    private void processMatchesWithAnimation() {
         boolean[][] toCrush = getMatchMatrix();
 
         if (hasMatch()) {
@@ -91,7 +136,7 @@ public class CandyCrushGame {
                     refillBoard();
 
                     // Continue if more matches occur
-                    processMatchesAnimated();
+                    processMatchesWithAnimation();
                 });
 
                 delay.setRepeats(false);
