@@ -4,6 +4,7 @@ import java.util.Random;
 public class CandyUtils {
     private static final char[] candies = {'A', 'B', 'C', 'D'};
     private static final Random random = new Random();
+    private static final int animationDelay = 250;
 
     public static char randomCandy() {
         return candies[random.nextInt(candies.length)];
@@ -17,5 +18,9 @@ public class CandyUtils {
             case 'D' -> Color.MAGENTA;
             default -> Color.LIGHT_GRAY;
         };
+    }
+
+    public static int getAnimationDelay() {
+        return animationDelay;
     }
 }

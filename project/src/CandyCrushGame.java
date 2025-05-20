@@ -1,10 +1,15 @@
 import java.awt.*;
 
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+
 public class CandyCrushGame {
     private final int SIZE;
     private final CandyButton[][] buttons;
     private int totalScore = 0;
     private final int scorePerCandy = 10;
+
+    private Runnable scoreUpdateCallback;
 
     public CandyCrushGame(CandyButton[][] buttons, int size) {
         this.buttons = buttons;
@@ -48,6 +53,9 @@ public class CandyCrushGame {
         return false;
     }
 
+    /**
+     * Process candies match, without animation. This is useful for preprocessing matches when the game start.
+     */
     public void processMatches() {
         boolean foundMatch;
 
@@ -58,6 +66,40 @@ public class CandyCrushGame {
         } while (foundMatch);
     }
 
+    /**
+     * Processing candies match, but with animation.
+     */
+    public void processMatchesAnimated() {
+        boolean[][] toCrush = getMatchMatrix();
+
+        if (hasMatch()) {
+            animateCrush(toCrush, () -> {
+                // Update score
+                int crushedCount = countCrushedCandies(toCrush);
+                totalScore += crushedCount * scorePerCandy;
+
+                // Notify GUI to update score
+                if (scoreUpdateCallback != null) {
+                    SwingUtilities.invokeLater(scoreUpdateCallback);
+                }
+
+                crushMatches();
+
+                Timer delay = new Timer(CandyUtils.getAnimationDelay(), e -> {
+                    ((Timer) e.getSource()).stop();
+                    dropCandies();
+                    refillBoard();
+
+                    // Continue if more matches occur
+                    processMatchesAnimated();
+                });
+
+                delay.setRepeats(false);
+                delay.start();                
+            });
+        }
+    }
+
     private boolean isEmpty(CandyButton btn) {
         return btn.getText().equals(" ");
     }
@@ -65,7 +107,6 @@ public class CandyCrushGame {
     private boolean crushMatches() {
         boolean[][] toCrush = getMatchMatrix();
         boolean crushed = false;
-        int crushedCount = 0;
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -74,13 +115,8 @@ public class CandyCrushGame {
                     buttons[i][j].setBackground(Color.WHITE);
 
                     crushed = true;
-                    crushedCount++;
                 }
             }
-        }
-
-        if (crushed) {
-            totalScore += crushedCount * scorePerCandy;
         }
 
         return crushed;
@@ -149,5 +185,55 @@ public class CandyCrushGame {
         } 
 
         return toCrush;
+    }
+
+    // Animate the matches of candies by blinking
+    private void animateCrush(boolean[][] toCrush, Runnable onComplete) {
+        final int[] blinkStep = {0};
+        final int maxBlinkStep = 4;
+        
+        Timer timer = new Timer(CandyUtils.getAnimationDelay(), null);
+
+        timer.addActionListener(e -> {
+            if (blinkStep[0] < maxBlinkStep) {
+                for (int i = 0; i < SIZE; i++) {
+                    for (int j = 0; j < SIZE; j++) {
+                        if (toCrush[i][j]) {
+                            Color currentCandyColor = buttons[i][j].getBackground();
+                            buttons[i][j].setBackground(
+                                currentCandyColor.equals(Color.WHITE)
+                                    ? CandyUtils.getColorForCandy(buttons[i][j].getText().charAt(0))
+                                    : Color.WHITE
+                            );
+                        }
+                    }
+                }
+
+                blinkStep[0]++;
+            } else {
+                timer.stop();
+                onComplete.run(); // Call the logic to crush candies
+            }
+        });
+
+        timer.start();
+    }
+
+    private int countCrushedCandies(boolean[][] toCrush) {
+        int count = 0;
+
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (toCrush[i][j]) {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    public void setScoreUpdateCallback(Runnable callback) {
+        this.scoreUpdateCallback = callback;
     }
 }
