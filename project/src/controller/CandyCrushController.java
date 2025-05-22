@@ -14,24 +14,34 @@ public class CandyCrushController {
         this.view = view;
     }
     
-    public void handleCandyClick(CandyButton clicked) {
+    public void handleCandyClick(CandyButton clickedButton) {
         if (firstButton == null) {
-            firstButton = clicked;
+            // First selection
+            firstButton = clickedButton;
             view.highlightButton(firstButton, true);
         } else {
+            // Second selection
             view.highlightButton(firstButton, false);
 
-            if (firstButton != clicked && game.areAdjacent(firstButton, clicked)) {
-                CandyButton a = firstButton;
-                CandyButton b = clicked;
-                game.animateSwap(a, b, () -> {
-                    game.swap(a, b);
-                    if (game.hasMatch()) {
-                        game.processMatches(true);
-                    } else {
-                        game.animateSwap(a, b, () -> game.swap(a, b)); // revert
-                    }
-                });
+            if (firstButton != clickedButton) {
+                CandyCell firstCell = firstButton.getCell();
+                CandyCell secondCell = clickedButton.getCell();
+
+                if (game.areAdjacent(firstCell, secondCell)) {
+                    CandyButton a = firstButton;
+                    CandyButton b = clickedButton;
+
+                    game.animateSwap(a, b, () -> {
+                        game.swap(firstCell, secondCell);
+
+                        if (game.hasMatch()) {
+                            game.processMatches(true);
+                        } else {
+                            game.animateSwap(a, b, () -> game.swap(firstCell, secondCell)); // revert
+                        }
+                    });
+                }
+
             }
 
             firstButton = null;

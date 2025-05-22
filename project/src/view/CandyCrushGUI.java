@@ -15,6 +15,7 @@ import java.awt.*;
  */
 public class CandyCrushGUI extends JFrame {
     private final int gridSize = GameConfig.GRID_SIZE;
+    private final CandyCell[][] cells = new CandyCell[gridSize][gridSize];
     private final CandyButton[][] buttons = new CandyButton[gridSize][gridSize];
 
     private final JLabel scoreLabel = new JLabel("Score: 0", SwingConstants.CENTER);
@@ -24,12 +25,12 @@ public class CandyCrushGUI extends JFrame {
 
     public CandyCrushGUI() {
         configureWindow();
-        JPanel gridPanel = createGridPanel();
+        JPanel gridPanel = initializeGrid();
 
         add(scoreLabel, BorderLayout.NORTH);
         add(gridPanel, BorderLayout.CENTER);
 
-        game = new CandyCrushGame(buttons, gridSize);
+        game = new CandyCrushGame(cells, buttons, gridSize);
         game.setScoreUpdateCallback(() -> scoreLabel.setText("Score: " + game.getTotalScore()));
 
         controller = new CandyCrushController(game, this);
@@ -51,18 +52,21 @@ public class CandyCrushGUI extends JFrame {
     }
 
     /**
-     * Creates and returns the panel containing the candy grid.
+     * Initialize and returns the panel containing the candy grid.
      */
-    private JPanel createGridPanel() {
+    private JPanel initializeGrid() {
         JPanel panel = new JPanel(new GridLayout(gridSize, gridSize));
 
         for (int row = 0; row < gridSize; row++) {
             for (int col = 0; col < gridSize; col++) {
                 CandyType candy = CandyUtils.getRandomCandy();
-                CandyButton btn = new CandyButton(row, col, candy);
+                CandyCell cell = new CandyCell(row, col, candy);
+                cells[row][col] = cell;
+
+                CandyButton btn = new CandyButton(cell);
+                buttons[row][col] = btn;
                 btn.addActionListener(e -> handleClick(btn));
 
-                buttons[row][col] = btn;
                 panel.add(btn);
             }
         }
