@@ -1,7 +1,6 @@
 package model;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * Represents a single candy button on the board.
@@ -9,13 +8,15 @@ import java.awt.*;
 public class CandyButton extends JButton {
     private final int row;
     private final int column;
+    private CandyType candyType;
 
     public CandyButton(int row, int column, CandyType candyType) {
-        super(String.valueOf(candyType.getSymbol()));
         this.row = row;
         this.column = column;
-        setFont(new Font("Arial", Font.BOLD, 20));
-        setBackground(candyType.getColor());
+        setCandy(candyType);
+        setBorderPainted(true);
+        setContentAreaFilled(false);
+        setBorder(BorderFactory.createEmptyBorder());
     }
 
     public int getRow() {
@@ -27,21 +28,25 @@ public class CandyButton extends JButton {
     }
 
     public void setCandy(CandyType type) {
-        setText(String.valueOf(type.getSymbol()));
-        setBackground(type.getColor());
+        this.candyType = type;
+
+        if (type != null) {
+            setIcon(type.getIcon());
+        } else {
+            setIcon(null);
+        }
     }
 
     public CandyType getCandyType() {
-        if (isEmpty()) return null;
-        return CandyType.fromChar(getText().charAt(0));
+        return candyType;
     }
 
     public boolean isEmpty() {
-        return getText().equals(" ");
+        return candyType == null;
     }
 
     public void clearCandy() {
-        setText(" ");
-        setBackground(Color.WHITE);
+        this.candyType = null;
+        setIcon(null);
     }
 }

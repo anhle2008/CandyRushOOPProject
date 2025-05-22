@@ -5,6 +5,8 @@ import util.CandyUtils;
 import controller.CandyCrushController;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+
 import java.awt.*;
 
 /**
@@ -80,10 +82,12 @@ public class CandyCrushGUI extends JFrame {
      */
     public void highlightButton(CandyButton btn, boolean highlight) {
         if (highlight) {
-            btn.setBackground(Color.YELLOW);
+            // Use a compound border with padding to make it stand out more
+            Border outer = BorderFactory.createLineBorder(Color.ORANGE, 4);
+            Border inner = BorderFactory.createEmptyBorder(2, 2, 2, 2);
+            btn.setBorder(BorderFactory.createCompoundBorder(outer, inner));;
         } else {
-            CandyType type = btn.getCandyType();
-            btn.setBackground(type != null ? type.getColor() : Color.WHITE);
+            btn.setBorder(BorderFactory.createEmptyBorder());
         }
     }
 }

@@ -3,7 +3,6 @@ package model;
 import util.CandyUtils;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  * Game logic class for Candy Crush.
@@ -33,14 +32,9 @@ public class CandyCrushGame {
      * Swaps the appearance and type of two candy buttons.
      */
     public void swap(CandyButton a, CandyButton b) {
-        String tempText = a.getText();
-        Color tempColor = a.getBackground();
-
-        a.setText(b.getText());
-        a.setBackground(b.getBackground());
-
-        b.setText(tempText);
-        b.setBackground(tempColor);
+        CandyType temp = a.getCandyType();
+        a.setCandy(b.getCandyType());
+        b.setCandy(temp);
     }
 
     /**
@@ -56,17 +50,16 @@ public class CandyCrushGame {
      * Starts an animation for swapping candies, followed by a callback.
      */
     public void animateSwap(CandyButton a, CandyButton b, Runnable onComplete) {
-        Color originalA = a.getBackground();
-        Color originalB = b.getBackground();
+        CandyType originalA = a.getCandyType();
+        CandyType originalB = b.getCandyType();
 
-        a.setBackground(Color.YELLOW);
-        b.setBackground(Color.YELLOW);
+        Timer timer = new Timer(CandyUtils.getSwapDelay(), null);
 
-        Timer timer = new Timer(CandyUtils.getAnimationDelay(), e -> {
-            a.setBackground(originalA);
-            b.setBackground(originalB);
+        timer.addActionListener(e -> {
+            a.setCandy(originalA);
+            b.setCandy(originalB);
             onComplete.run();
-            ((Timer) e.getSource()).stop();
+            timer.stop();
         });
 
         timer.setRepeats(false);
@@ -107,15 +100,17 @@ public class CandyCrushGame {
 
             crushMatches(); // Crush again after animation
 
-            Timer delay = new Timer(CandyUtils.getAnimationDelay(), e -> {
-                ((Timer) e.getSource()).stop();
+            Timer timer = new Timer(CandyUtils.getPostCrushDelay(), null);
+
+            timer.addActionListener(e -> {
+                timer.stop();
                 dropCandies();
                 refillBoard();
                 processMatchesWithAnimation(); // Recursively check for more matches
             });
 
-            delay.setRepeats(false);
-            delay.start();
+            timer.setRepeats(false);
+            timer.start();
         });
     }
 
@@ -163,8 +158,8 @@ public class CandyCrushGame {
 
             for (int row = size - 1; row >= 0; row--) {
                 if (!board[row][column].isEmpty()) {
-                    board[emptyRow][column].setText(board[row][column].getText());
-                    board[emptyRow][column].setBackground(board[row][column].getBackground());
+                    CandyType candy = board[row][column].getCandyType();
+                    board[emptyRow][column].setCandy(candy);
 
                     if (emptyRow != row) {
                         board[row][column].clearCandy();
@@ -199,11 +194,11 @@ public class CandyCrushGame {
         // Horizontal
         for (int i = 0; i < size; i++) {
             for (int j = 0; j <= size - 3; j++) {
-                String c1 = board[i][j].getText();
-                String c2 = board[i][j + 1].getText();
-                String c3 = board[i][j + 2].getText();
+                CandyType c1 = board[i][j].getCandyType();
+                CandyType c2 = board[i][j + 1].getCandyType();
+                CandyType c3 = board[i][j + 2].getCandyType();
 
-                if (!c1.equals(" ") && c1.equals(c2) && c2.equals(c3)) {
+                if (c1 != null && c1.equals(c2) && c2.equals(c3)) {
                     matches[i][j] = matches[i][j + 1] = matches[i][j + 2] = true;
                 }
             }
@@ -212,11 +207,11 @@ public class CandyCrushGame {
         // Vertical
         for (int j = 0; j < size; j++) {
             for (int i = 0; i <= size - 3; i++) {
-                String c1 = board[i][j].getText();
-                String c2 = board[i + 1][j].getText();
-                String c3 = board[i + 2][j].getText();
+                CandyType c1 = board[i][j].getCandyType();
+                CandyType c2 = board[i + 1][j].getCandyType();
+                CandyType c3 = board[i + 2][j].getCandyType();
 
-                if (!c1.equals(" ") && c1.equals(c2) && c2.equals(c3)) {
+                if (c1 != null && c1.equals(c2) && c2.equals(c3)) {
                     matches[i][j] = matches[i + 1][j] = matches[i + 2][j] = true;
                 }
             }
@@ -232,7 +227,18 @@ public class CandyCrushGame {
         final int[] blinkStep = {0};
         final int maxSteps = 4;
 
-        Timer timer = new Timer(CandyUtils.getAnimationDelay(), null);
+        // Store original icons for blinking toggle
+        ImageIcon[][] originalIcons = new ImageIcon[size][size];
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (toCrush[i][j]) {
+                    originalIcons[i][j] = board[i][j].getCandyType().getIcon();
+                }
+            }
+        }
+
+        Timer timer = new Timer(CandyUtils.getCrushBlinkDelay(), null);
 
         timer.addActionListener(e -> {
             if (blinkStep[0] < maxSteps) {
@@ -240,9 +246,13 @@ public class CandyCrushGame {
                     for (int j = 0; j < size; j++) {
                         if (toCrush[i][j]) {
                             CandyButton btn = board[i][j];
-                            btn.setBackground(btn.getBackground().equals(Color.WHITE)
-                                    ? CandyType.fromChar(btn.getText().charAt(0)).getColor()
-                                    : Color.WHITE);
+
+                            // Toggle between blank and original icon
+                            if (btn.getIcon() != null) {
+                                btn.setIcon(null); // Hide
+                            } else {
+                                btn.setIcon(originalIcons[i][j]); // Restore
+                            }
                         }
                     }
                 }

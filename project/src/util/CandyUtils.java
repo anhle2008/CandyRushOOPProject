@@ -5,7 +5,7 @@ import model.*;
 import java.util.Random;
 
 /**
- * Utility class for generating random candies and managing aniation delay.
+ * Utility class for generating random candies and managing animation delay.
  */
 public class CandyUtils {
     private static final Random random = new Random();
@@ -15,7 +15,15 @@ public class CandyUtils {
         return types[random.nextInt(types.length)];
     }
 
-    public static int getAnimationDelay() {
-        return GameConfig.ANIMATION_DELAY_MS;
+    public static int getSwapDelay() {
+        return GameConfig.SWAP_DELAY_MS;
+    }
+
+    public static int getCrushBlinkDelay() {
+        return GameConfig.CRUSH_BLINK_DELAY_MS;
+    }
+
+    public static int getPostCrushDelay() {
+        return GameConfig.POST_CRUSH_DELAY_MS;
     }
 }
