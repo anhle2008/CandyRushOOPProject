@@ -1,4 +1,4 @@
-package model.scoring;
+package model.manager;
 
 import model.config.GameConfig;
 

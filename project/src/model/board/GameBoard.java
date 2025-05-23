@@ -1,7 +1,7 @@
 package model.board;
 
-import util.CandyUtils;
 import model.type.CandyType;
+import util.CandyUtils;
 
 /**
  * Manage the grid of candies (their state, dropping, refilling, swapping).
@@ -27,16 +27,15 @@ public class GameBoard {
         a.setCandyType(b.getCandyType());
         b.setCandyType(temp);
     }
-
     
     /**
      * Clears matched candies from the board.
      */
     public void crush(boolean[][] matches) {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (matches[i][j]) {
-                    board[i][j].clearCandy();
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                if (matches[row][col]) {
+                    board[row][col].clearCandy();
                 }
             }
         }
@@ -68,11 +67,11 @@ public class GameBoard {
      * Refills the board with random candies where empty.
      */
     public void refillBoard() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (board[i][j].isEmpty()) {
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                if (board[row][col].isEmpty()) {
                     CandyType candy = CandyUtils.getRandomCandy();
-                    board[i][j].setCandyType(candy);
+                    board[row][col].setCandyType(candy);
                 }
             }
         }

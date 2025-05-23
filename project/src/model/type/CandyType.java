@@ -35,7 +35,7 @@ public enum CandyType {
     }
 
     public static CandyType fromChar(char c) {
-        for (CandyType type : values()) {
+        for (CandyType type: values()) {
             if (type.symbol == c) return type;
         }
         throw new IllegalArgumentException("Invalid candy: " + c);

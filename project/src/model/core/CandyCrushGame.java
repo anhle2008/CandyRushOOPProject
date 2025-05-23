@@ -1,10 +1,10 @@
 package model.core;
 
-import util.CandyUtils;
-import view.CandyButton;
-import model.scoring.ScoreManager;
 import model.board.*;
 import model.logic.*;
+import model.manager.*;
+import util.CandyUtils;
+import view.CandyButton;
 
 import java.util.*;
 import javax.swing.Timer;
@@ -90,6 +90,33 @@ public class CandyCrushGame {
         }
     }
 
+    public void addPoints(int candyCount) {
+        scoreManager.addPoints(candyCount);
+        notifyScoreUpdate();
+    }
+
+    public void startCountDown() {
+        gameTimer = new Timer(1000, e -> {
+            remainingTimeSeconds--;
+            notifyTimeUpdate();
+            if (remainingTimeSeconds <= 0) {
+                gameTimer.stop();
+                notifyGameOver();
+            }
+        });
+        gameTimer.start();
+    }
+
+    public void decrementMove() {
+        if (mode == GameMode.MOVE_LIMITED) {
+            remainingMoves--;
+            notifyMovesUpdate();
+            if (remainingMoves <= 0) {
+                notifyGameOver();
+            }
+        }
+    }
+
     /**
      * Processing match without animation, useful for preprocessing the board.
      */
@@ -139,9 +166,9 @@ public class CandyCrushGame {
 
     private void updateAllButtonIcons() {
         int size = buttonGrid.length;
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                buttonGrid[i][j].updateIcon();
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                buttonGrid[row][col].updateIcon();
             }
         }
     }
@@ -167,33 +194,6 @@ public class CandyCrushGame {
     private void notifyGameOver() {
         for (GameStateListener l: listeners) {
             l.onGameOver();
-        }
-    }
-
-    public void addPoints(int candyCount) {
-        scoreManager.addPoints(candyCount);
-        notifyScoreUpdate();
-    }
-
-    public void startCountDown() {
-        gameTimer = new Timer(1000, e -> {
-            remainingTimeSeconds--;
-            notifyTimeUpdate();
-            if (remainingTimeSeconds <= 0) {
-                gameTimer.stop();
-                notifyGameOver();
-            }
-        });
-        gameTimer.start();
-    }
-
-    public void decrementMove() {
-        if (mode == GameMode.MOVE_LIMITED) {
-            remainingMoves--;
-            notifyMovesUpdate();
-            if (remainingMoves <= 0) {
-                notifyGameOver();
-            }
         }
     }
 }

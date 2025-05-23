@@ -1,4 +1,4 @@
-package model.logic;
+package model.manager;
 
 import util.CandyUtils;
 import view.CandyButton;
@@ -47,10 +47,10 @@ public class AnimationManager {
 
         // Store original icons for blinking toggle
         Icon[][] originalIcons = new Icon[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                if (toCrush[i][j]) {
-                    originalIcons[i][j] = buttons[i][j].getIcon();
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col < size; col++) {
+                if (toCrush[row][col]) {
+                    originalIcons[row][col] = buttons[row][col].getIcon();
                 }
             }
         }
@@ -58,11 +58,11 @@ public class AnimationManager {
         Timer timer = new Timer(CandyUtils.getCrushBlinkDelay(), null);
         timer.addActionListener(e -> {
             if (blinkStep[0] < maxSteps) {
-                for (int i = 0; i < size; i++) {
-                    for (int j = 0; j < size; j++) {
-                        if (toCrush[i][j]) {
-                            Icon current = buttons[i][j].getIcon();
-                            buttons[i][j].setIcon(current == null ? originalIcons[i][j] : null);
+                for (int row = 0; row < size; row++) {
+                    for (int col = 0; col < size; col++) {
+                        if (toCrush[row][col]) {
+                            Icon current = buttons[row][col].getIcon();
+                            buttons[row][col].setIcon(current == null ? originalIcons[row][col] : null);
                         }
                     }
                 }

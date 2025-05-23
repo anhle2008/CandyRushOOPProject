@@ -15,27 +15,27 @@ public class MatchFinder {
         boolean[][] matches = new boolean[size][size];
 
         // Horizontal
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j <= size - 3; j++) {
-                CandyType c1 = board[i][j].getCandyType();
-                CandyType c2 = board[i][j + 1].getCandyType();
-                CandyType c3 = board[i][j + 2].getCandyType();
+        for (int row = 0; row < size; row++) {
+            for (int col = 0; col <= size - 3; col++) {
+                CandyType c1 = board[row][col].getCandyType();
+                CandyType c2 = board[row][col + 1].getCandyType();
+                CandyType c3 = board[row][col + 2].getCandyType();
 
                 if (c1 != null && c1.equals(c2) && c2.equals(c3)) {
-                    matches[i][j] = matches[i][j + 1] = matches[i][j + 2] = true;
+                    matches[row][col] = matches[row][col + 1] = matches[row][col + 2] = true;
                 }
             }
         }
 
         // Vertical
-        for (int j = 0; j < size; j++) {
-            for (int i = 0; i <= size - 3; i++) {
-                CandyType c1 = board[i][j].getCandyType();
-                CandyType c2 = board[i + 1][j].getCandyType();
-                CandyType c3 = board[i + 2][j].getCandyType();
+        for (int col = 0; col < size; col++) {
+            for (int row = 0; row <= size - 3; row++) {
+                CandyType c1 = board[row][col].getCandyType();
+                CandyType c2 = board[row + 1][col].getCandyType();
+                CandyType c3 = board[row + 2][col].getCandyType();
 
                 if (c1 != null && c1.equals(c2) && c2.equals(c3)) {
-                    matches[i][j] = matches[i + 1][j] = matches[i + 2][j] = true;
+                    matches[row][col] = matches[row + 1][col] = matches[row + 2][col] = true;
                 }
             }
         }
@@ -47,8 +47,8 @@ public class MatchFinder {
      * Check candies matches in the board.
      */
     public static boolean hasMatch(boolean[][] matchMatrix) {
-        for (boolean[] row : matchMatrix) {
-            for (boolean cell : row) {
+        for (boolean[] row: matchMatrix) {
+            for (boolean cell: row) {
                 if (cell) return true;
             }
         }
@@ -60,8 +60,8 @@ public class MatchFinder {
      */
     public static int countMatches(boolean[][] matchMatrix) {
         int count = 0;
-        for (boolean[] row : matchMatrix) {
-            for (boolean cell : row) {
+        for (boolean[] row: matchMatrix) {
+            for (boolean cell: row) {
                 if (cell) count++;
             }
         }

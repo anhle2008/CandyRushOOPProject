@@ -29,9 +29,11 @@ public class CandyCrushGUI extends JFrame implements GameStateListener {
     private final GameMode mode;
 
     public CandyCrushGUI(GameMode mode) {
+        GUI gui = new GUI(this, "Candy Crush Mini", GameConfig.WINDOW_WIDTH, GameConfig.WINDOW_HEIGHT, new BorderLayout());
+        gui.setFontForComponents(new JComponent[]{scoreLabel, modeLabel});
+
         this.mode = mode;
 
-        configureWindow();
         JPanel topPanel = initializeTopPanel();
         JPanel gridPanel = initializeGrid();
 
@@ -50,60 +52,6 @@ public class CandyCrushGUI extends JFrame implements GameStateListener {
     }
 
     /**
-     * Initializes the main game window settings.
-     */
-    private void configureWindow() {
-        setTitle("Candy Crush Mini");
-        setSize(GameConfig.WINDOW_WIDTH, GameConfig.WINDOW_HEIGHT);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        scoreLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        modeLabel.setFont(new Font("Arial", Font.BOLD, 20));
-    }
-
-    /**
-     * Initialize and returns the panel containing the candy grid.
-     */
-    private JPanel initializeGrid() {
-        JPanel panel = new JPanel(new GridLayout(gridSize, gridSize));
-
-        for (int row = 0; row < gridSize; row++) {
-            for (int col = 0; col < gridSize; col++) {
-                CandyType candy = CandyUtils.getRandomCandy();
-                CandyCell cell = new CandyCell(row, col, candy);
-                cells[row][col] = cell;
-
-                CandyButton btn = new CandyButton(cell);
-                buttons[row][col] = btn;
-                btn.addActionListener(e -> handleClick(btn, mode));
-
-                panel.add(btn);
-            }
-        }
-
-        return panel;
-    }
-
-    /**
-     * Initialize top panel for score and mode-related label
-     */
-    private JPanel initializeTopPanel() {
-        JPanel panel = new JPanel(new GridLayout(1 ,2));
-        panel.add(scoreLabel, BorderLayout.NORTH);
-        panel.add(modeLabel, BorderLayout.CENTER);
-
-        return panel;
-    }
-
-    /**
-     * Handles a user's click on a candy button.
-     */
-    private void handleClick(CandyButton clicked, GameMode mode) {
-        controller.handleCandyClick(clicked, mode);
-    }
-
-    /**
      * Visually highlights or unhighlights a button.
      */
     public void highlightButton(CandyButton btn, boolean highlight) {
@@ -117,25 +65,7 @@ public class CandyCrushGUI extends JFrame implements GameStateListener {
         }
     }
 
-    private void updateModeLabel() {
-        switch (mode) {
-            case TIME_LIMITED:
-                modeLabel.setText("Time left: " + game.getRemainingTimeSeconds() + "s");
-                break;
-            case MOVE_LIMITED:
-                modeLabel.setText("Moves left: " + game.getRemainingMoves());
-                break;
-            case ENDLESS: // Normal mode
-                break;
-        }
-    }
-
-    private void startGame() {
-        if (mode == GameMode.TIME_LIMITED) {
-            game.startCountDown();
-        }
-    }
-
+    // -------------- GameStateListener methods --------------
     @Override
     public void onTimeUpdate(int newTimeSeconds) {
         modeLabel.setText("Time left: " + newTimeSeconds + "s");
@@ -160,15 +90,99 @@ public class CandyCrushGUI extends JFrame implements GameStateListener {
         }
     }
 
+    /**
+     * Show a "Game Over" dialog with custom message.
+     */
     public void showGameOverDialog(String message) {
         // Disable all buttons
-        for (int i = 0; i < gridSize; i++) {
-            for (int j = 0; j < gridSize; j++) {
-                buttons[i][j].setEnabled(false);
+        for (int row = 0; row < gridSize; row++) {
+            for (int col = 0; col < gridSize; col++) {
+                buttons[row][col].setEnabled(false);
             }
         }
 
         // Show popup dialog
         JOptionPane.showMessageDialog(this, message, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /**
+     * Initialize and returns the panel containing the candy grid.
+     */
+    private JPanel initializeGrid() {
+        JPanel panel = new JPanel(new GridLayout(gridSize, gridSize));
+
+        for (int row = 0; row < gridSize; row++) {
+            for (int col = 0; col < gridSize; col++) {
+                CandyCell cell = createCandy(row, col);
+                cells[row][col] = cell;
+
+                CandyButton btn = createButton(cell);
+                buttons[row][col] = btn;
+
+                panel.add(btn);
+            }
+        }
+
+        return panel;
+    }
+
+    /**
+     * Initialize top panel for score and mode-related label
+     */
+    private JPanel initializeTopPanel() {
+        JPanel panel = new JPanel(new GridLayout(1 ,2));
+        panel.add(scoreLabel, BorderLayout.NORTH);
+        panel.add(modeLabel, BorderLayout.CENTER);
+
+        return panel;
+    }
+    
+    /**
+     * Helper method to create candy.
+     */
+    private CandyCell createCandy(int row, int col) {
+        CandyType candy = CandyUtils.getRandomCandy();
+        return new CandyCell(row, col, candy);
+    }
+
+    /**
+     * Helper method to create candy button
+     */
+    private CandyButton createButton(CandyCell cell) {
+        CandyButton button = new CandyButton(cell);
+        button.addActionListener(e -> handleClick(button, mode));
+        return button;
+    }
+
+    /**
+     * Handles a user's click on a candy button.
+     */
+    private void handleClick(CandyButton clicked, GameMode mode) {
+        controller.handleCandyClick(clicked, mode);
+    }
+
+    /**
+     * Update label based on mode.
+     */
+    private void updateModeLabel() {
+        switch (mode) {
+            case TIME_LIMITED:
+                modeLabel.setText("Time left: " + game.getRemainingTimeSeconds() + "s");
+                break;
+            case MOVE_LIMITED:
+                modeLabel.setText("Moves left: " + game.getRemainingMoves());
+                break;
+            case ENDLESS: // Normal mode
+                break;
+        }
+    }
+
+    /**
+     * Helper method to start game. Currently only for starting "Beat the clock!" timer.
+     */
+    private void startGame() {
+        if (mode == GameMode.TIME_LIMITED) {
+            game.startCountDown();
+        }
     }
 }

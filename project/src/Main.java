@@ -1,6 +1,6 @@
 import view.GameMenuGUI;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 /**
  * Entry point for the Candy Crush game.
