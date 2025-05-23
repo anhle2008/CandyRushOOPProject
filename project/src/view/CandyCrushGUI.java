@@ -27,10 +27,12 @@ public class CandyCrushGUI extends JFrame implements GameStateListener {
     private final CandyCrushGame game;
     private final CandyCrushController controller;
     private final GameMode mode;
+    private final GameDialogManager dialogManager;
 
     public CandyCrushGUI(GameMode mode) {
         GUI gui = new GUI(this, "Candy Crush Mini", GameConfig.WINDOW_WIDTH, GameConfig.WINDOW_HEIGHT, new BorderLayout());
         gui.setFontForComponents(new JComponent[]{scoreLabel, modeLabel});
+        dialogManager = new GameDialogManager(this, buttons);
 
         this.mode = mode;
 
@@ -46,7 +48,7 @@ public class CandyCrushGUI extends JFrame implements GameStateListener {
         controller = new CandyCrushController(game, this);
 
         game.processMatches(false); // Preprocess any initial matches
-        startGame();
+        onScoreUpdate(game.getTotalScore(), game.getMaximumScore()); // Initial score
         updateModeLabel(); // Setting label according to mode
         setVisible(true);
     }
@@ -77,32 +79,30 @@ public class CandyCrushGUI extends JFrame implements GameStateListener {
     }
 
     @Override
-    public void onScoreUpdate(int newScore) {
-        scoreLabel.setText("Score: " + newScore);
+    public void onScoreUpdate(int newScore, int maxScore) {
+        String message = "Score: " + newScore;
+
+        if (maxScore != 0) {
+            message += "/" + maxScore;
+        }
+
+        scoreLabel.setText(message);
     }
     
     @Override
     public void onGameOver() {
         if (mode == GameMode.TIME_LIMITED) {
-            showGameOverDialog("Time's Up!");
+            dialogManager.showGameOverDialog("Time's Up!");
         } else if (mode == GameMode.MOVE_LIMITED) {
-            showGameOverDialog("No more moves left!");
+            dialogManager.showGameOverDialog("No more moves left!");
         }
+        dialogManager.showPlayAgainDialog(() -> restartGame());
     }
 
-    /**
-     * Show a "Game Over" dialog with custom message.
-     */
-    public void showGameOverDialog(String message) {
-        // Disable all buttons
-        for (int row = 0; row < gridSize; row++) {
-            for (int col = 0; col < gridSize; col++) {
-                buttons[row][col].setEnabled(false);
-            }
-        }
-
-        // Show popup dialog
-        JOptionPane.showMessageDialog(this, message, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+    @Override
+    public void onWinning() {
+        dialogManager.showWinningDialog();
+        dialogManager.showPlayAgainDialog(() -> restartGame());
     }
 
     /**
@@ -178,11 +178,12 @@ public class CandyCrushGUI extends JFrame implements GameStateListener {
     }
 
     /**
-     * Helper method to start game. Currently only for starting "Beat the clock!" timer.
+     * Helper method to restart game. Currently just reinitialize the same game mode.
      */
-    private void startGame() {
-        if (mode == GameMode.TIME_LIMITED) {
-            game.startCountDown();
-        }
+    private void restartGame() {
+        GUI.restart(this, () -> {
+            game.stopGame(); // Stop previous timer when in "Beat the clock!" mode
+            new CandyCrushGUI(mode);
+        });
     }
 }

@@ -1,8 +1,8 @@
 package model.manager;
 
-import util.CandyUtils;
 import view.CandyButton;
 import model.board.CandyCell;
+import model.config.GameConfig;
 
 import javax.swing.*;
 
@@ -25,7 +25,7 @@ public class AnimationManager {
         Icon iconA = a.getIcon();
         Icon iconB = b.getIcon();
 
-        Timer timer = new Timer(CandyUtils.getSwapDelay(), null);
+        Timer timer = new Timer(GameConfig.SWAP_DELAY_MS, null);
         timer.addActionListener(e -> {
             a.setIcon(iconB);
             b.setIcon(iconA);
@@ -55,7 +55,7 @@ public class AnimationManager {
             }
         }
 
-        Timer timer = new Timer(CandyUtils.getCrushBlinkDelay(), null);
+        Timer timer = new Timer(GameConfig.CRUSH_BLINK_DELAY_MS, null);
         timer.addActionListener(e -> {
             if (blinkStep[0] < maxSteps) {
                 for (int row = 0; row < size; row++) {

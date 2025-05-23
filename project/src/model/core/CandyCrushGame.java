@@ -1,9 +1,9 @@
 package model.core;
 
 import model.board.*;
+import model.config.GameConfig;
 import model.logic.*;
 import model.manager.*;
-import util.CandyUtils;
 import view.CandyButton;
 
 import java.util.*;
@@ -24,6 +24,7 @@ public class CandyCrushGame {
     private int remainingMoves;
     private int remainingTimeSeconds;
     private Timer gameTimer;
+    private boolean hasWon = false;
 
     public CandyCrushGame(CandyCell[][] cellGrid, CandyButton[][] buttonGrid, int size, GameMode mode) {
         this.gameBoard = new GameBoard(cellGrid, size);
@@ -33,12 +34,20 @@ public class CandyCrushGame {
 
         this.buttonGrid = buttonGrid;
 
-        this.remainingMoves = 5; // default value
-        this.remainingTimeSeconds = 10; 
+        this.remainingMoves = GameConfig.MAX_MOVES;
+        this.remainingTimeSeconds = GameConfig.MAX_TIME_SECONDS;
+
+        if (mode == GameMode.TIME_LIMITED) {
+            startGame();
+        }
     }
 
     public int getTotalScore() {
         return scoreManager.getTotalScore();
+    }
+
+    public int getMaximumScore() {
+        return scoreManager.getMaximumScore(mode);
     }
 
     public int getRemainingTimeSeconds() {
@@ -55,6 +64,25 @@ public class CandyCrushGame {
 
     public void removeGameStateListener(GameStateListener listener) {
         listeners.remove(listener);
+    }
+
+    /**
+     * Helper method to start game. Currently only for starting "Beat the clock!" timer.
+     */
+    public void startGame() {
+        hasWon = false; // Also reset this flag on restarting game
+        if (mode == GameMode.TIME_LIMITED) {
+            startCountDown();
+        }
+    }
+
+    /**
+     * Helper method to stop game. Currently ensure countdown timer is stopped.
+     */
+    public void stopGame() {
+        if (gameTimer != null) {
+            gameTimer.stop();
+        }
     }
 
     /**
@@ -93,13 +121,19 @@ public class CandyCrushGame {
     public void addPoints(int candyCount) {
         scoreManager.addPoints(candyCount);
         notifyScoreUpdate();
+
+        if (isReachedGoal() && mode == GameMode.MOVE_LIMITED) {
+            notifyWinning();
+        }
     }
 
     public void startCountDown() {
         gameTimer = new Timer(1000, e -> {
             remainingTimeSeconds--;
             notifyTimeUpdate();
-            if (remainingTimeSeconds <= 0) {
+            if (isReachedGoal()) {
+                notifyWinning();
+            } else if (remainingTimeSeconds <= 0) {
                 gameTimer.stop();
                 notifyGameOver();
             }
@@ -111,7 +145,9 @@ public class CandyCrushGame {
         if (mode == GameMode.MOVE_LIMITED) {
             remainingMoves--;
             notifyMovesUpdate();
-            if (remainingMoves <= 0) {
+            if (isReachedGoal()) {
+                notifyWinning();
+            } else if (remainingMoves <= 0) {
                 notifyGameOver();
             }
         }
@@ -148,10 +184,9 @@ public class CandyCrushGame {
         animationManager.animateCrush(matches, () -> {
             int candyCount = MatchFinder.countMatches(matches);
             gameBoard.crush(matches);
-            scoreManager.addPoints(candyCount);
-            notifyScoreUpdate();
+            addPoints(candyCount);
 
-            Timer timer = new Timer(CandyUtils.getPostCrushDelay(), null);
+            Timer timer = new Timer(GameConfig.POST_CRUSH_DELAY_MS, null);
             timer.addActionListener(e -> {
                 timer.stop();
                 gameBoard.dropCandies();
@@ -173,6 +208,10 @@ public class CandyCrushGame {
         }
     }
 
+    private boolean isReachedGoal() {
+        return scoreManager.getTotalScore() >= GameConfig.SCORE_GOAL;
+    }
+
     private void notifyTimeUpdate() {
         for (GameStateListener l: listeners) {
             l.onTimeUpdate(remainingTimeSeconds);
@@ -187,13 +226,22 @@ public class CandyCrushGame {
 
     private void notifyScoreUpdate() {
         for (GameStateListener l: listeners) {
-            l.onScoreUpdate(scoreManager.getTotalScore());
+            l.onScoreUpdate(scoreManager.getTotalScore(), scoreManager.getMaximumScore(mode));
         }
     }
 
     private void notifyGameOver() {
         for (GameStateListener l: listeners) {
             l.onGameOver();
+        }
+    }
+
+    private void notifyWinning() {
+        if (!hasWon) {
+            hasWon = true;
+            for (GameStateListener l: listeners) {
+                l.onWinning();
+            }
         }
     }
 }

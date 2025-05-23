@@ -6,6 +6,9 @@ public class GameConfig {
     // Gameplay settings
     public static final int GRID_SIZE = 6;
     public static final int SCORE_PER_CANDY = 20;
+    public static final int MAX_TIME_SECONDS = 60;
+    public static final int MAX_MOVES = 20;
+    public static final int SCORE_GOAL = 2500;
 
     // Animation settings
     public static final int SWAP_DELAY_MS = 120;

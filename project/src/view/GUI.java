@@ -23,4 +23,14 @@ public class GUI {
             component.setFont(font);
         }
     }
+
+    /**
+     * Restart the GUI and run action.
+     */
+    public static void restart(JFrame parent, Runnable action) {
+        SwingUtilities.invokeLater(() -> {
+            parent.dispose(); // Close current window
+            action.run();
+        });
+    }
 }
