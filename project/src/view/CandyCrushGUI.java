@@ -1,8 +1,11 @@
 package view;
 
-import model.*;
-import util.CandyUtils;
 import controller.CandyCrushController;
+import model.board.CandyCell;
+import model.config.GameConfig;
+import model.core.*;
+import model.type.CandyType;
+import util.CandyUtils;
 
 import javax.swing.*;
 import javax.swing.border.Border;

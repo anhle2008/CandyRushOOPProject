@@ -1,4 +1,7 @@
-package model;
+package model.logic;
+
+import model.board.CandyCell;
+import model.type.CandyType;
 
 /**
  * Handles finding of all matches (3 or more in a row or column).

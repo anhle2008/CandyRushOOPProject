@@ -1,4 +1,4 @@
-package model;
+package model.core;
 
 public interface GameStateListener {
     void onTimeUpdate(int newTimeSeconds);

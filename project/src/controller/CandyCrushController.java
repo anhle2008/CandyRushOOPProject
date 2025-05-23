@@ -1,6 +1,7 @@
 package controller;
 
-import model.*;
+import model.board.CandyCell;
+import model.core.*;
 import view.*;
 
 public class CandyCrushController {

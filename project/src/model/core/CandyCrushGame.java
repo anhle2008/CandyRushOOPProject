@@ -1,12 +1,13 @@
-package model;
+package model.core;
 
 import util.CandyUtils;
 import view.CandyButton;
+import model.scoring.ScoreManager;
+import model.board.*;
+import model.logic.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.*;
+import java.util.*;
+import javax.swing.Timer;
 
 /**
  * Game logic class for Candy Crush.

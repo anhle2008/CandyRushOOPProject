@@ -1,6 +1,7 @@
 package util;
 
-import model.*;
+import model.config.GameConfig;
+import model.type.CandyType;
 
 import java.util.Random;
 

@@ -1,4 +1,4 @@
-package model;
+package model.config;
 
 public class GameConfig {
     public static final int GRID_SIZE = 6;

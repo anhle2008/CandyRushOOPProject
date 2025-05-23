@@ -1,6 +1,7 @@
-package model;
+package model.board;
 
 import util.CandyUtils;
+import model.type.CandyType;
 
 /**
  * Manage the grid of candies (their state, dropping, refilling, swapping).

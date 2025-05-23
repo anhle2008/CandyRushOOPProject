@@ -1,8 +1,9 @@
 package view;
 
-import model.*;
-
 import javax.swing.*;
+
+import model.core.GameMode;
+
 import java.awt.*;
 
 public class GameMenuGUI extends JFrame {

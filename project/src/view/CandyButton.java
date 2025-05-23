@@ -1,6 +1,7 @@
 package view;
 
-import model.*;
+import model.board.CandyCell;
+import model.type.CandyType;
 
 import javax.swing.*;
 

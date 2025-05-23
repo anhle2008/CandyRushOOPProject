@@ -1,4 +1,4 @@
-import view.*;
+import view.GameMenuGUI;
 
 import javax.swing.*;
 

@@ -1,7 +1,8 @@
-package model;
+package model.logic;
 
 import util.CandyUtils;
 import view.CandyButton;
+import model.board.CandyCell;
 
 import javax.swing.*;
 

@@ -1,4 +1,6 @@
-package model;
+package model.scoring;
+
+import model.config.GameConfig;
 
 /**
  * Handles score calculation and callback updates.

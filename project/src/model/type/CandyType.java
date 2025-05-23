@@ -1,4 +1,6 @@
-package model;
+package model.type;
+
+import model.config.GameConfig;
 
 import java.awt.Image;
 import javax.swing.ImageIcon;

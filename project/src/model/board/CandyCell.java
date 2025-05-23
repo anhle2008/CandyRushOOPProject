@@ -1,4 +1,6 @@
-package model;
+package model.board;
+
+import model.type.CandyType;
 
 public class CandyCell {
     private final int row;
