@@ -14,7 +14,7 @@ public class CandyCrushController {
         this.view = view;
     }
     
-    public void handleCandyClick(CandyButton clickedButton) {
+    public void handleCandyClick(CandyButton clickedButton, GameMode mode) {
         if (firstButton == null) {
             // First selection
             firstButton = clickedButton;
@@ -36,6 +36,7 @@ public class CandyCrushController {
 
                         if (game.hasMatch()) {
                             game.processMatches(true);
+                            game.decrementMove(); // only when game mode is "limited move"
                         } else {
                             game.animateSwap(a, b, () -> game.swap(firstCell, secondCell)); // revert
                         }

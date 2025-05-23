@@ -3,6 +3,9 @@ package model;
 import util.CandyUtils;
 import view.CandyButton;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.*;
 
 /**
@@ -13,22 +16,44 @@ public class CandyCrushGame {
     private final GameBoard gameBoard;
     private final ScoreManager scoreManager;
     private final AnimationManager animationManager;
-
+    private final GameMode mode;
     private final CandyButton[][] buttonGrid;
+    private final List<GameStateListener> listeners = new ArrayList<>();
 
-    public CandyCrushGame(CandyCell[][] cellGrid, CandyButton[][] buttonGrid, int size) {
+    private int remainingMoves;
+    private int remainingTimeSeconds;
+    private Timer gameTimer;
+
+    public CandyCrushGame(CandyCell[][] cellGrid, CandyButton[][] buttonGrid, int size, GameMode mode) {
         this.gameBoard = new GameBoard(cellGrid, size);
         this.scoreManager = new ScoreManager();
         this.animationManager = new AnimationManager(cellGrid, buttonGrid);
-        this.buttonGrid = buttonGrid;
-    }
+        this.mode = mode;
 
-    public void setScoreUpdateCallback(Runnable callback) {
-        scoreManager.setUpdateCallback(callback);
+        this.buttonGrid = buttonGrid;
+
+        this.remainingMoves = 5; // default value
+        this.remainingTimeSeconds = 10; 
     }
 
     public int getTotalScore() {
         return scoreManager.getTotalScore();
+    }
+
+    public int getRemainingTimeSeconds() {
+        return remainingTimeSeconds;
+    }
+
+    public int getRemainingMoves() {
+        return remainingMoves;
+    }
+
+    public void addGameStateListener(GameStateListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeGameStateListener(GameStateListener listener) {
+        listeners.remove(listener);
     }
 
     /**
@@ -96,6 +121,7 @@ public class CandyCrushGame {
             int candyCount = MatchFinder.countMatches(matches);
             gameBoard.crush(matches);
             scoreManager.addPoints(candyCount);
+            notifyScoreUpdate();
 
             Timer timer = new Timer(CandyUtils.getPostCrushDelay(), null);
             timer.addActionListener(e -> {
@@ -117,5 +143,56 @@ public class CandyCrushGame {
                 buttonGrid[i][j].updateIcon();
             }
         }
-     }
+    }
+
+    private void notifyTimeUpdate() {
+        for (GameStateListener l: listeners) {
+            l.onTimeUpdate(remainingTimeSeconds);
+        }
+    }
+
+    private void notifyMovesUpdate() {
+        for (GameStateListener l: listeners) {
+            l.onMovesUpdate(remainingMoves);
+        }
+    }
+
+    private void notifyScoreUpdate() {
+        for (GameStateListener l: listeners) {
+            l.onScoreUpdate(scoreManager.getTotalScore());
+        }
+    }
+
+    private void notifyGameOver() {
+        for (GameStateListener l: listeners) {
+            l.onGameOver();
+        }
+    }
+
+    public void addPoints(int candyCount) {
+        scoreManager.addPoints(candyCount);
+        notifyScoreUpdate();
+    }
+
+    public void startCountDown() {
+        gameTimer = new Timer(1000, e -> {
+            remainingTimeSeconds--;
+            notifyTimeUpdate();
+            if (remainingTimeSeconds <= 0) {
+                gameTimer.stop();
+                notifyGameOver();
+            }
+        });
+        gameTimer.start();
+    }
+
+    public void decrementMove() {
+        if (mode == GameMode.MOVE_LIMITED) {
+            remainingMoves--;
+            notifyMovesUpdate();
+            if (remainingMoves <= 0) {
+                notifyGameOver();
+            }
+        }
+    }
 }
