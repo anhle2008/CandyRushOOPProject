@@ -3,6 +3,10 @@ This project presents a mini version of Candy Crush, a popular match-3 game, wri
 
 This project is a part of university's assignment.
 
+# Contributors
+- Vu Quoc Khanh: animation, game menu, game mode, report.
+- Le Nhat Anh: logic, gui, presentation slides.
+
 # Credit
 - [Free Game Assets](https://free-game-assets.itch.io/free-match-3-game-assets) for sprites.
 - [GeeksForGeeks](https://www.geeksforgeeks.org/introduction-to-java-swing/) and [TpointTech](https://www.tpointtech.com/java-swing) for Swing tutorial.
